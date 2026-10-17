@@ -119,6 +119,9 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:8px 0 14px}
 .seek{flex:1;min-width:0}
 .seek input[type=range]{margin:0}
 .times{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums}
+.hero{display:flex;align-items:center;gap:16px}
+.portrait{width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;opacity:.92;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line),0 6px 18px rgba(91,75,122,.18)}
+.hero .lead{margin-top:4px}
 .linkish{background:none;border:0;color:var(--accent);font-weight:700;padding:0}
 </style>
 </head>
@@ -127,8 +130,13 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:8px 0 14px}
 
   <!-- REIKI -->
   <section class="view active" id="view-reiki" role="tabpanel">
-    <h1>Reiki healing</h1>
-    <p class="lead">33 points a day. Log how many you completed and watch your practice grow.</p>
+    <header class="hero">
+      <img class="portrait" src="portrait.jpg" alt="" width="84" height="84">
+      <div>
+        <h1>Reiki healing</h1>
+        <p class="lead">33 points a day. Log how many you completed and watch your practice grow.</p>
+      </div>
+    </header>
 
     <div class="card player" id="player">
       <div class="row between">
