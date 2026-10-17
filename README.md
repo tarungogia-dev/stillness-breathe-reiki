@@ -3,9 +3,9 @@
 A single-file, mobile-first web app with two tools:
 
 - **Mindful breathing** – configurable inhale / hold / exhale timer (default 4-7-8) with full-screen colour phases, a soft synthesized tone per phase, and screen wake-lock.
-- **Reiki healing tracker** – log up to 33 points per day, see streaks, 7-day average, a 14-day chart, and play your own "healing bells" MP3 every 3 seconds.
+- **Reiki healing tracker** – log up to 33 points per day, see streaks, 7-day average, a 14-day chart, and play the built-in healing bells track (`bells_9mins.mp3`) on a continuous loop with play/pause.
 
-Data is stored in the browser (localStorage / IndexedDB). Light and dark themes follow the device setting.
+Data is stored in the browser (localStorage). Light and dark themes follow the device setting.
 
 ## Run it
 
