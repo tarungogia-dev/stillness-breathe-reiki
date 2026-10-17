@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stillness – Breathe & Reiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F3F1F7; --surface:#FFFFFF; --ink:#2B2638; --muted:#6F6882; --line:#E2DEEA;
+  --accent:#5B4B7A; --accent-ink:#FFFFFF; --soft:#EAE4F4;
+  --inhale:#CFE4F5; --hold:#DED4F2; --exhale:#D8EEDD;
+  --good:#3E8E5E; --warn:#B8762A; --bad:#B4494E;
+  --radius:18px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#1D1B24; --surface:#27242F; --ink:#F0ECF6; --muted:#A9A2B8; --line:#3A3645;
+    --accent:#C7B8E8; --accent-ink:#1D1B24; --soft:#332E40;
+    --inhale:#7FA6C6; --hold:#9A8BC4; --exhale:#86B494;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#1D1B24; --surface:#27242F; --ink:#F0ECF6; --muted:#A9A2B8; --line:#3A3645;
+  --accent:#C7B8E8; --accent-ink:#1D1B24; --soft:#332E40;
+  --inhale:#7FA6C6; --hold:#9A8BC4; --exhale:#86B494;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:inherit}
+h1,h2,h3{font-family:"Fraunces","Iowan Old Style",Georgia,serif;font-weight:500;margin:0;line-height:1.15}
+h1{font-size:2rem}
+h2{font-size:1.4rem}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,label:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:560px;margin:0 auto;padding:20px 20px 110px}
+.view{display:none}.view.active{display:block}
+.tabs{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);display:flex;gap:10px;justify-content:center;z-index:20}
+.tabs button{flex:1;max-width:220px;border:0;border-radius:14px;padding:12px;background:transparent;color:var(--muted);font-weight:700;font-size:1rem}
+.tabs button[aria-selected="true"]{background:var(--soft);color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-top:16px}
+.lead{color:var(--muted);margin-top:6px}
+.btn{border:0;border-radius:999px;padding:14px 24px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.05rem;width:100%}
+.btn.secondary{background:var(--soft);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:12px;align-items:center}
+.row.between{justify-content:space-between}
+
+/* Breathing settings */
+.durations{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.durations label{display:block;border-radius:14px;padding:12px 10px;text-align:center;font-weight:700}
+.durations label.in{background:var(--inhale)}.durations label.ho{background:var(--hold)}.durations label.ex{background:var(--exhale)}
+.durations input{display:block;width:100%;margin-top:6px;border:0;background:rgba(255,255,255,.65);border-radius:10px;padding:8px 4px;font:600 1.6rem "Fraunces",serif;text-align:center;color:#2B2638}
+.durations small{display:block;color:#2B2638;opacity:.7;font-weight:600}
+.switch{display:flex;align-items:center;gap:12px;margin-top:16px;cursor:pointer;font-weight:600}
+.switch input{appearance:none;width:48px;height:28px;border-radius:999px;background:var(--line);position:relative;transition:background .2s;flex-shrink:0;margin:0}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{transform:translateX(20px)}
+.hint{color:var(--muted);font-size:.92rem;margin-top:10px}
+
+/* Breathing session (full screen) */
+#session{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--inhale);transition:background 1.2s ease;z-index:50;color:#2B2638;padding:env(safe-area-inset-top,0px) 20px env(safe-area-inset-bottom,0px)}
+#session.on{display:flex}
+#session .phase{font-family:"Fraunces",serif;font-size:3rem;font-weight:300;letter-spacing:.01em}
+#session .count{font-family:"Fraunces",serif;font-size:7rem;font-weight:300;line-height:1;margin:6px 0 20px;font-variant-numeric:tabular-nums}
+#session .orb{width:min(58vw,260px);height:min(58vw,260px);border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 0 0 18px rgba(255,255,255,.22);transition:transform linear}
+#session .cycles{margin-top:28px;opacity:.7;font-weight:600}
+#session .end{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom,0px));border:0;background:rgba(255,255,255,.6);color:#2B2638;padding:12px 26px;border-radius:999px;font-weight:700}
+@media (prefers-reduced-motion:reduce){#session .orb{transition:none!important}#session{transition:none}}
+
+/* Reiki */
+.today{display:flex;align-items:center;justify-content:center;gap:18px;margin:14px 0 6px}
+.today .num{font-family:"Fraunces",serif;font-size:4.6rem;font-weight:300;line-height:1;min-width:2.2ch;text-align:center;font-variant-numeric:tabular-nums}
+.today .of{color:var(--muted);align-self:flex-end;padding-bottom:10px}
+.stepper{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--soft);font-size:1.6rem;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:8px 0 14px}
+.datepick{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.95rem}
+.datepick input{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:6px 8px}
+.msg{margin-top:14px;padding:14px 16px;border-radius:14px;font-weight:600;display:none;border-left:5px solid}
+.msg.good{display:block;background:color-mix(in srgb,var(--good) 12%,var(--surface));border-color:var(--good)}
+.msg.mid{display:block;background:color-mix(in srgb,var(--accent) 12%,var(--surface));border-color:var(--accent)}
+.msg.warn{display:block;background:color-mix(in srgb,var(--warn) 14%,var(--surface));border-color:var(--warn)}
+.msg.bad{display:block;background:color-mix(in srgb,var(--bad) 12%,var(--surface));border-color:var(--bad)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.stat{background:var(--bg);border-radius:14px;padding:12px 14px}
+.stat b{display:block;font-family:"Fraunces",serif;font-weight:500;font-size:1.7rem;line-height:1.1}
+.stat span{color:var(--muted);font-size:.9rem}
+.chartwrap{overflow-x:auto;margin-top:10px}
+.chart{width:100%;height:auto;display:block}
+.bar{fill:var(--accent);opacity:.35}.bar.full{opacity:1}
+.axis{fill:var(--muted);font-size:11px;font-family:"Nunito",sans-serif}
+.goal{stroke:var(--muted);stroke-dasharray:4 4;opacity:.6}
+.history{list-style:none;margin:10px 0 0;padding:0}
+.history li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+.history li:last-child{border-bottom:0}
+.history .pts{font-weight:700}
+.bells-status{color:var(--muted);font-size:.95rem;margin-top:6px;word-break:break-word}
+.bells-actions{display:flex;gap:10px;margin-top:14px}
+.bells-actions .btn{width:auto;flex:1}
+.filebtn{display:inline-block}
+.filebtn input{position:absolute;opacity:0;width:0;height:0}
+.pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--good);margin-right:8px;vertical-align:middle;animation:pulse 3s infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:.5}10%{transform:scale(1.3);opacity:1}40%{transform:scale(.9);opacity:.7}100%{transform:scale(.6);opacity:.5}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+.linkish{background:none;border:0;color:var(--accent);font-weight:700;padding:0}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- BREATHE -->
+  <section class="view active" id="view-breathe" role="tabpanel">
+    <h1>Mindful breathing</h1>
+    <p class="lead">Settle in. The screen changes colour as each phase begins, so you can keep your eyes closed and follow the light through your lids, or the sound.</p>
+
+    <div class="card">
+      <h2>Rhythm</h2>
+      <p class="lead">Seconds for each phase. 4‑7‑8 is set for you; change any number.</p>
+      <div class="durations">
+        <label class="in">Inhale<input id="d-in" type="number" inputmode="numeric" min="1" max="60" value="4"><small>seconds</small></label>
+        <label class="ho">Hold<input id="d-hold" type="number" inputmode="numeric" min="0" max="60" value="7"><small>seconds</small></label>
+        <label class="ex">Exhale<input id="d-ex" type="number" inputmode="numeric" min="1" max="60" value="8"><small>seconds</small></label>
+      </div>
+      <label class="switch"><input type="checkbox" id="music-toggle" checked> Soft sound (a different tone for each phase)</label>
+      <button class="linkish" id="reset-478" style="margin-top:10px">Reset to 4‑7‑8</button>
+    </div>
+
+    <div class="card">
+      <button class="btn" id="start-breathe">Begin breathing</button>
+      <p class="hint">Runs until you tap End. Keep the phone unlocked so the colours and sound continue.</p>
+    </div>
+  </section>
+
+  <!-- REIKI -->
+  <section class="view" id="view-reiki" role="tabpanel">
+    <h1>Reiki healing</h1>
+    <p class="lead">33 points a day. Log how many you completed and watch your practice grow.</p>
+
+    <div class="card">
+      <div class="row between">
+        <h2>Points done</h2>
+        <div class="datepick"><label for="log-date">for</label><input type="date" id="log-date"></div>
+      </div>
+      <div class="today">
+        <button class="stepper" id="minus" aria-label="One less">−</button>
+        <div class="num" id="today-num">0</div>
+        <div class="of">of 33</div>
+        <button class="stepper" id="plus" aria-label="One more">+</button>
+      </div>
+      <input type="range" id="today-range" min="0" max="33" value="0" aria-label="Points completed">
+      <button class="btn" id="save-day">Save this day</button>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>How you’re doing</h2>
+      <div class="stats" id="stats"></div>
+      <div class="chartwrap" id="chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="row between">
+        <h2>Healing bells</h2>
+        <span id="bells-live" style="display:none"><span class="pulse"></span>ringing every 3 s</span>
+      </div>
+      <p class="lead">Upload your bells once; they stay here. While playing, the bells ring every three seconds.</p>
+      <p class="bells-status" id="bells-status">No bells uploaded yet.</p>
+      <div class="bells-actions">
+        <button class="btn" id="bells-play" disabled>Play bells</button>
+        <label class="btn secondary filebtn" for="bells-file">Upload MP3<input type="file" id="bells-file" accept="audio/*"></label>
+      </div>
+      <button class="linkish" id="bells-remove" style="margin-top:12px;display:none">Remove bells</button>
+    </div>
+
+    <div class="card">
+      <h2>Recent days</h2>
+      <ul class="history" id="history"></ul>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button role="tab" aria-selected="true" data-view="breathe">Breathe</button>
+  <button role="tab" aria-selected="false" data-view="reiki">Reiki</button>
+</nav>
+
+<div id="session" aria-live="polite">
+  <div class="phase" id="s-phase">Inhale</div>
+  <div class="count" id="s-count">4</div>
+  <div class="orb" id="orb"></div>
+  <div class="cycles" id="s-cycles">Cycle 1</div>
+  <button class="end" id="end-breathe">End</button>
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+b.dataset.view));
+  window.scrollTo(0,0);
+}));
+
+/* ---------- storage helpers (per-device) ---------- */
+const LS=(k,v)=>{try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v));}catch(e){return null}};
+
+/* ================= BREATHING ================= */
+const dIn=document.getElementById('d-in'),dHold=document.getElementById('d-hold'),dEx=document.getElementById('d-ex'),musicToggle=document.getElementById('music-toggle');
+(function restore(){const s=LS('breath')||{};if(s.in)dIn.value=s.in;if(s.hold!==undefined)dHold.value=s.hold;if(s.ex)dEx.value=s.ex;if(s.music!==undefined)musicToggle.checked=s.music;})();
+function saveBreath(){LS('breath',{in:+dIn.value,hold:+dHold.value,ex:+dEx.value,music:musicToggle.checked})}
+[dIn,dHold,dEx,musicToggle].forEach(el=>el.addEventListener('change',saveBreath));
+document.getElementById('reset-478').addEventListener('click',()=>{dIn.value=4;dHold.value=7;dEx.value=8;saveBreath();});
+
+const session=document.getElementById('session'),sPhase=document.getElementById('s-phase'),sCount=document.getElementById('s-count'),orb=document.getElementById('orb'),sCycles=document.getElementById('s-cycles');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let running=false,timer=null,wakeLock=null;
+
+/* gentle synthesized sound: one sustained pad per phase, soft chime on change */
+let ac=null,pad=null,padGain=null;
+const NOTES={inhale:[261.63,329.63],hold:[293.66,392.0],exhale:[220.0,277.18]};
+function ensureAudio(){if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();}if(ac.state==='suspended')ac.resume();}
+function stopPad(){if(pad){const t=ac.currentTime;padGain.gain.cancelScheduledValues(t);padGain.gain.setTargetAtTime(0,t,0.4);pad.forEach(o=>o.stop(t+2));pad=null;}}
+function playPhaseSound(phase,secs){
+  if(!musicToggle.checked)return;ensureAudio();stopPad();
+  const t=ac.currentTime,g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.08,t+1.2);
+  g.gain.setTargetAtTime(0.0001,t+Math.max(0.5,secs-1),0.5);g.connect(ac.destination);
+  pad=NOTES[phase].map(f=>{const o=ac.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(t);return o;});
+  padGain=g;
+  // small chime to mark the change
+  const c=ac.createOscillator(),cg=ac.createGain();c.type='triangle';c.frequency.value=NOTES[phase][1]*2;
+  cg.gain.setValueAtTime(0.0001,t);cg.gain.exponentialRampToValueAtTime(0.06,t+0.03);cg.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
+  c.connect(cg).connect(ac.destination);c.start(t);c.stop(t+1.7);
+}
+
+async function startBreathing(){
+  const plan=[{k:'inhale',label:'Inhale',secs:+dIn.value||4,scale:1.35},{k:'hold',label:'Hold',secs:+dHold.value||0,scale:1.35},{k:'exhale',label:'Exhale',secs:+dEx.value||8,scale:0.75}].filter(p=>p.secs>0);
+  running=true;session.classList.add('on');document.body.style.overflow='hidden';
+  if(musicToggle.checked)ensureAudio();
+  try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}
+  let cycle=1,i=0;orb.style.transform='scale(0.75)';
+  const step=()=>{
+    if(!running)return;
+    const p=plan[i];
+    session.style.background=css('--'+p.k);
+    sPhase.textContent=p.label;sCycles.textContent='Cycle '+cycle;
+    orb.style.transitionDuration=p.secs+'s';requestAnimationFrame(()=>orb.style.transform='scale('+p.scale+')');
+    playPhaseSound(p.k,p.secs);
+    let left=p.secs;sCount.textContent=left;
+    clearInterval(timer);
+    timer=setInterval(()=>{left--;if(left>0){sCount.textContent=left;}else{clearInterval(timer);i=(i+1)%plan.length;if(i===0)cycle++;step();}},1000);
+  };
+  step();
+}
+function stopBreathing(){running=false;clearInterval(timer);session.classList.remove('on');document.body.style.overflow='';if(ac)stopPad();try{wakeLock?.release();}catch(e){}wakeLock=null;}
+document.getElementById('start-breathe').addEventListener('click',startBreathing);
+document.getElementById('end-breathe').addEventListener('click',stopBreathing);
+
+/* ================= REIKI ================= */
+const GOAL=33,HALF=Math.ceil(GOAL/2);
+const todayKey=d=>{const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+const logDate=document.getElementById('log-date'),numEl=document.getElementById('today-num'),range=document.getElementById('today-range'),msg=document.getElementById('msg');
+let log=LS('reiki')||{};          // {YYYY-MM-DD: points}
+logDate.value=todayKey();logDate.max=todayKey();
+function setVal(v){v=Math.max(0,Math.min(GOAL,v|0));numEl.textContent=v;range.value=v;}
+function loadDay(){setVal(log[logDate.value]||0);msg.className='msg';}
+logDate.addEventListener('change',loadDay);
+range.addEventListener('input',()=>setVal(+range.value));
+document.getElementById('plus').addEventListener('click',()=>setVal(+range.value+1));
+document.getElementById('minus').addEventListener('click',()=>setVal(+range.value-1));
+
+/* optional cloud copy (claude db), falls back to this device only */
+let cloudDoc=null;
+(async()=>{try{
+  if(!window.claude?.use)return;
+  const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
+  if(!db||!user)return;const id=await user.id();if(!id)return;
+  cloudDoc=db.doc('data/users/'+id+'/reiki');
+  const snap=await cloudDoc.get();const remote=(snap.exists&&snap.data()?.log)||{};
+  const merged={...remote,...log};let changed=JSON.stringify(merged)!==JSON.stringify(remote);
+  log=merged;LS('reiki',log);renderStats();loadDay();
+  if(changed)await cloudDoc.set({log});
+}catch(e){cloudDoc=null;}})();
+async function persist(){LS('reiki',log);if(cloudDoc){try{await cloudDoc.set({log});}catch(e){}}}
+
+document.getElementById('save-day').addEventListener('click',()=>{
+  const v=+range.value;log[logDate.value]=v;persist();renderStats();feedback(v);
+});
+function feedback(v){
+  msg.className='msg';
+  if(v>=GOAL){msg.classList.add('good');msg.textContent='Congratulations, you are doing great in your spiritual journey. All 33 points complete.';confetti();}
+  else if(v>=HALF){msg.classList.add('mid');msg.textContent='Good progress. '+(GOAL-v)+' points left to complete today’s healing.';}
+  else if(v>=Math.floor(GOAL/4)){msg.classList.add('warn');msg.textContent='You can do better. Please complete your healing daily.';}
+  else{msg.classList.add('bad');msg.textContent='You’re not on track. Make time for all 33 points today.';}
+}
+
+function renderStats(){
+  const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(todayKey(d));}
+  const vals=days.map(k=>log[k]||0);
+  const last7=vals.slice(-7);const avg7=last7.reduce((a,b)=>a+b,0)/7;
+  // streak of full days ending today (or yesterday if today not yet logged)
+  let streak=0;{const d=new Date();if(!log[todayKey(d)])d.setDate(d.getDate()-1);while((log[todayKey(d)]||0)>=GOAL){streak++;d.setDate(d.getDate()-1);}}
+  const keys=Object.keys(log);const total=keys.reduce((a,k)=>a+log[k],0);const full=keys.filter(k=>log[k]>=GOAL).length;
+  const month=todayKey().slice(0,7);const mKeys=keys.filter(k=>k.startsWith(month));const mFull=mKeys.filter(k=>log[k]>=GOAL).length;
+  document.getElementById('stats').innerHTML=
+    `<div class="stat"><b>${streak}</b><span>day streak of 33</span></div>
+     <div class="stat"><b>${avg7.toFixed(1)}</b><span>avg points, last 7 days</span></div>
+     <div class="stat"><b>${mFull}/${mKeys.length||0}</b><span>full days this month</span></div>
+     <div class="stat"><b>${total}</b><span>points healed in total${full?` · ${full} full days`:''}</span></div>`;
+  // 14-day bar chart
+  const W=520,H=190,pl=28,pb=28,pt=10,bw=(W-pl-8)/14;
+  let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points per day, last 14 days">`;
+  const y=v=>pt+(H-pt-pb)*(1-v/GOAL);
+  svg+=`<line class="goal" x1="${pl}" x2="${W}" y1="${y(GOAL)}" y2="${y(GOAL)}"/><text class="axis" x="0" y="${y(GOAL)+4}">33</text>`;
+  svg+=`<line class="goal" x1="${pl}" x2="${W}" y1="${y(HALF)}" y2="${y(HALF)}"/><text class="axis" x="0" y="${y(HALF)+4}">17</text>`;
+  days.forEach((k,i)=>{const v=vals[i],x=pl+i*bw+4,h=Math.max(0,y(0)-y(v));
+    svg+=`<rect class="bar${v>=GOAL?' full':''}" x="${x}" y="${y(v)}" width="${bw-8}" height="${h}" rx="4"/>`;
+    const lbl=k.slice(8).replace(/^0/,'');svg+=`<text class="axis" x="${x+(bw-8)/2}" y="${H-8}" text-anchor="middle">${lbl}</text>`;
+    if(v)svg+=`<text class="axis" x="${x+(bw-8)/2}" y="${y(v)-4}" text-anchor="middle">${v}</text>`;});
+  svg+='</svg>';document.getElementById('chart').innerHTML=svg;
+  // history
+  const hist=keys.sort().reverse().slice(0,14);
+  document.getElementById('history').innerHTML=hist.length?hist.map(k=>{const d=new Date(k+'T12:00:00');
+    return `<li><span>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}</span><span class="pts">${log[k]} / 33${log[k]>=GOAL?' ✓':''}</span></li>`;}).join('')
+    :'<li><span>Nothing logged yet. Save today’s points above.</span></li>';
+}
+renderStats();loadDay();
+
+/* ---------- confetti ---------- */
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=document.getElementById('confetti'),ctx=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#CFE4F5','#DED4F2','#D8EEDD','#FBE3C8','#F7D3DD','#5B4B7A'];
+  const ps=Array.from({length:160},()=>({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*0.45,vx:(Math.random()-.5)*14,vy:-Math.random()*16-6,r:4+Math.random()*5,c:cols[Math.random()*cols.length|0],a:Math.random()*Math.PI,s:(Math.random()-.5)*.3}));
+  let frames=0;(function tick(){ctx.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.vy+=0.35;p.x+=p.vx;p.y+=p.vy;p.a+=p.s;p.vx*=0.99;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore();});
+    if(++frames<180)requestAnimationFrame(tick);else ctx.clearRect(0,0,c.width,c.height);})();
+}
+
+/* ---------- bells (stored on this phone in IndexedDB) ---------- */
+const bellsStatus=document.getElementById('bells-status'),bellsPlay=document.getElementById('bells-play'),bellsRemove=document.getElementById('bells-remove'),bellsLive=document.getElementById('bells-live');
+let bellAudio=null,bellTimer=null,bellUrl=null;
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('stillness',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbGet(k){try{const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('files').objectStore('files').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error);});}catch(e){return null}}
+async function idbSet(k,v){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('files','readwrite');t.objectStore('files').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+async function idbDel(k){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('files','readwrite');t.objectStore('files').delete(k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+function loadBells(rec){
+  if(bellUrl)URL.revokeObjectURL(bellUrl);
+  if(!rec){bellAudio=null;bellsStatus.textContent='No bells uploaded yet.';bellsPlay.disabled=true;bellsRemove.style.display='none';return;}
+  bellUrl=URL.createObjectURL(rec.blob);bellAudio=new Audio(bellUrl);bellAudio.preload='auto';
+  bellsStatus.textContent='Saved: '+rec.name;bellsPlay.disabled=false;bellsRemove.style.display='inline';
+}
+idbGet('bells').then(loadBells);
+document.getElementById('bells-file').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;stopBells();
+  try{await idbSet('bells',{name:f.name,blob:f});loadBells({name:f.name,blob:f});}
+  catch(err){bellsStatus.textContent='Could not save the file on this phone. Try a smaller MP3.';}
+  e.target.value='';
+});
+bellsRemove.addEventListener('click',async()=>{stopBells();await idbDel('bells');loadBells(null);});
+function ring(){if(!bellAudio)return;bellAudio.currentTime=0;bellAudio.play().catch(()=>{});}
+function startBells(){ring();bellTimer=setInterval(ring,3000);bellsPlay.textContent='Stop bells';bellsLive.style.display='inline';}
+function stopBells(){clearInterval(bellTimer);bellTimer=null;if(bellAudio){bellAudio.pause();}bellsPlay.textContent='Play bells';bellsLive.style.display='none';}
+bellsPlay.addEventListener('click',()=>bellTimer?stopBells():startBells());
+</script>
+</body>
+</html>
